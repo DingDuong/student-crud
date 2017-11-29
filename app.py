@@ -16,10 +16,24 @@ class Student(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   first_name = db.Column(db.Text)
   last_name = db.Column(db.Text)
+  excuses = db.relationship('Excuse', backref='student', lazy="dynamic", cascade="all,delete")
 
   def __init__(self, first_name, last_name):
     self.first_name = first_name
     self.last_name = last_name
+
+class Excuse(db.Model):
+
+  __tablename__ = "excuses"
+
+  id = db.Column(db.Integer, primary_key=True)
+  text = db.Column(db.Text)
+  student_id = db.Column(db.Integer, db.ForeignKey('students.id'))
+
+  def __init__(self, text, student_id):
+    self.text = text
+    self.student_id = student_id
+
 
 @app.route('/')
 def root():
