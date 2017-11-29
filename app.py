@@ -104,14 +104,27 @@ def excuses_new(student_id):
 # GET /students/<int:student_id>/excuses/<int:id>/edit
 @app.route('/students/<int:student_id>/excuses/<int:id>/edit')
 def excuses_edit(student_id, id):
-  pass
+  # go the the database and get the excuse!
+  excuse = Excuse.query.get(id)
+  return render_template('excuses/edit.html', excuse=excuse)
+
 
 # GET /students/<int:student_id>/excuses/<int:id>
 # PATCH /students/<int:student_id>/excuses/<int:id>
 # DELETE /students/<int:student_id>/excuses/<int:id>
-@app.route('/students/<int:student_id>/excuses/<int:id>')
+@app.route('/students/<int:student_id>/excuses/<int:id>', methods=["GET", "PATCH", "DELETE"])
 def excuses_show(student_id, id):
-  pass
+  excuse = Excuse.query.get(id)
+  if request.method == b'PATCH':
+    excuse.text = request.form['text']
+    db.session.add(excuse)
+    db.session.commit()
+    return redirect(url_for('excuses_index', student_id=student_id))
+  if request.method == b'DELETE':
+    db.session.delete(excuse)
+    db.session.commit()
+    return redirect(url_for('excuses_index', student_id=student_id))
+  return render_template('excuses/show.html', excuse=excuse)
 
 if __name__ == '__main__':
   app.run(debug=True, port=3000)

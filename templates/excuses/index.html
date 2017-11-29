@@ -6,6 +6,10 @@
   {% for excuse in student.excuses %}
     <p>
       {{excuse.text}}
+      <a href="{{url_for('excuses_edit', student_id=student.id , id=excuse.id)}}">Edit</a>
+      <form method="POST" action="{{url_for('excuses_show', student_id=student.id, id=excuse.id)}}?_method=DELETE">
+        <button>X</button>
+      </form>
     </p>
   {% endfor %}
 {% endblock %}
