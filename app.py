@@ -21,6 +21,43 @@ class Student(db.Model):
     self.first_name = first_name
     self.last_name = last_name
 
+@app.route('/')
+def root():
+  return redirect(url_for('index'))
+
+@app.route('/students', methods=["GET", "POST"])
+def index():
+  if request.method == 'POST':
+    new_student = Student(request.form['first_name'], request.form['last_name'])
+    db.session.add(new_student)
+    db.session.commit()
+    return redirect(url_for('index'))
+  return render_template('index.html', students=Student.query.all())
+
+@app.route('/students/new')
+def new():
+  return render_template('new.html')
+
+@app.route('/students/<int:id>/edit')
+def edit(id):
+  return render_template('edit.html', student=Student.query.get(id))
+
+@app.route('/students/<int:id>', methods=["GET", "PATCH", "DELETE"])
+def show(id):
+  student = Student.query.get(id)
+  if request.method == b'PATCH':
+    student.first_name = request.form['first_name']
+    student.last_name = request.form['last_name']
+    db.session.add(student)
+    db.session.commit()
+    return redirect(url_for('index'))
+  if request.method == b'DELETE':
+    db.session.delete(student)
+    db.session.commit()
+    return redirect(url_for('index'))
+  return render_template('show.html', student=student)
+
+
 if __name__ == '__main__':
   app.run(debug=True, port=3000)
 
