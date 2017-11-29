@@ -6,6 +6,7 @@
   {% for student in students %}
     <p>{{student.first_name}} - {{student.last_name}}</p>
     <p><a href="{{url_for('edit', id=student.id)}}">Edit me!</a></p>
+    <p><a href="{{url_for('excuses_index', student_id=student.id)}}">See {{student.first_name}}'s Excuses!</a></p>
     <form method="POST" action="{{url_for('show', id=student.id)}}?_method=DELETE">
       <button>X</button>
     </form>
