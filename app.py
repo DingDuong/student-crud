@@ -1,10 +1,13 @@
 from flask import Flask, request, render_template, url_for, redirect
 from flask_modus import Modus
 from flask_sqlalchemy import SQLAlchemy
+from forms import StudentForm
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/student-crud-in-class'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 modus = Modus(app)
 db = SQLAlchemy(app)
 
@@ -42,19 +45,25 @@ def root():
 @app.route('/students', methods=["GET", "POST"])
 def index():
   if request.method == 'POST':
-    new_student = Student(request.form['first_name'], request.form['last_name'])
-    db.session.add(new_student)
-    db.session.commit()
-    return redirect(url_for('index'))
+    form = StudentForm(request.form)
+    if form.validate():
+      new_student = Student(request.form['first_name'], request.form['last_name'])
+      db.session.add(new_student)
+      db.session.commit()
+      return redirect(url_for('index'))
+    return render_template('students/new.html', form=form)
   return render_template('students/index.html', students=Student.query.all())
 
 @app.route('/students/new')
 def new():
-  return render_template('students/new.html')
+  form = StudentForm()
+  return render_template('students/new.html', form=form)
 
 @app.route('/students/<int:id>/edit')
 def edit(id):
-  return render_template('students/edit.html', student=Student.query.get(id))
+  student=Student.query.get(id)
+  form = StudentForm(obj=student) # prepopulate the form - no need for value={{}}
+  return render_template('students/edit.html', form=form, student=student)
 
 @app.route('/students/<int:id>', methods=["GET", "PATCH", "DELETE"])
 def show(id):
